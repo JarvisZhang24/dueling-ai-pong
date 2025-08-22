@@ -5,3 +5,6 @@ env = PongGame(render_mode='human',
                player_2='bot',
                bot_difficulty='easy')
 
+env.game_loop()
+
+
