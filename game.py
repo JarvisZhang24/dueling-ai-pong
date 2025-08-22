@@ -76,13 +76,16 @@ class PongGame(gym.Env):
         pygame.display.set_caption("Pong")
 
         # Initialize clock
-        pygame.clock = pygame.time.Clock()
+        self.clock = pygame.time.Clock()
 
         # Initialize screen
         self.screen = pygame.display.set_mode((self.window_width, self.window_height))
 
         # Initialize fps
         self.fps = fps
+
+        # Initialize background color (gray)
+        self.background_color = (100, 100, 100) 
 
         # Initialize colors of players
         self.player_1_color = (102 , 0 , 204) # Purple
@@ -122,19 +125,35 @@ class PongGame(gym.Env):
         # Initialize Game state
         self.reset()
      
-    '''
-    Reset the game state
-    '''
+    # Reset the game state
     def reset(self):
-          pass
+
+        self.player_1_score = 0
+        self.player_2_score = 0
+
+        self.top_score = 20
+
+    # Fill the background with a color
+    def fill_background(self):
+        # Clear screen
+        self.screen.fill(self.background_color)
+
+        # Render scores
+        player_1_score_text = self.font.render(str(self.player_1_score), True, self.player_1_color)
+        player_2_score_text = self.font.render(str(self.player_2_score), True, self.player_2_color)
+
+        # Render scores
+        self.screen.blit(player_1_score_text, (self.window_width / 4, 10))
+        self.screen.blit(player_2_score_text, (3 * self.window_width / 4, 10))
+        
 	
-    '''
-    Game loop
-    '''
+    # Game loop
     def game_loop(self):
 
-        while(True):
-
+        # Main game loop; fill background and update display each frame.
+        while True:
+            # Clear frame background
+            self.fill_background()
             player_1_action = 0
             player_2_action = 0
 
@@ -147,45 +166,35 @@ class PongGame(gym.Env):
             # Get keys pressed
             keys = pygame.key.get_pressed()
 
-            # Player 1 actions
+            # Player 1 actions if human player pressed w or s
             if self.player_1 == 'human':
                 if keys[pygame.K_w]:
                     player_1_action = 1
                 elif keys[pygame.K_s]:
                     player_1_action = 2
             
-            # Player 2 actions
+            # Player 2 actions if human player pressed up or down
             if self.player_2 == 'human':
                 if keys[pygame.K_UP]:
                     player_2_action = 1
                 elif keys[pygame.K_DOWN]:
                     player_2_action = 2
             
-            print('Player 1 action: ', player_1_action)
-            print('Player 2 action: ', player_2_action)
-                
-
-
-
+            # Print player actions
+            if (player_1_action != 0 ):
+                print('Player 1 action: ', player_1_action)
             
-            
-		
-		
+            if (player_2_action != 0 ):
+                print('Player 2 action: ', player_2_action)
 
-         
-         
+            # Step the environment
+            self.step(player_1_action, player_2_action)
 
-
+    # Step the environment
+    def step(self , player_1_action: int, player_2_action: int):
         
-
-
-
-
-        
-
-     
-
-            
-        
-
-
+        self.fill_background()
+        if (self.render_mode == 'human'):
+            pygame.display.flip()
+            if hasattr(self, 'clock'):
+                self.clock.tick(self.fps)
