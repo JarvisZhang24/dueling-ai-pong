@@ -1,10 +1,10 @@
 """Pong game environment module."""
 
-import pygame
-import sys
-import numpy as np
-import gymnasium as gym
 import os
+import sys
+
+import pygame
+import gymnasium as gym
 
 class PongGame(gym.Env):
     """Pong game environment built on Gymnasium.
@@ -23,8 +23,8 @@ class PongGame(gym.Env):
     
     def __init__(
         self,
-        window_width: int = 720,
-        window_height: int = 480,
+        window_width: int = 1080,
+        window_height: int = 720,
         fps: int = 60,
         player_1: str = 'ai',
         player_2: str = 'bot',
@@ -66,10 +66,12 @@ class PongGame(gym.Env):
         self.step_repeat = step_repeat
 
         # Enable headless mode when not using on-screen ('human') rendering so pygame can
-        # run without a display (e.g., CI or servers). This must be set BEFORE calling
+        # run without a display (e.g., CI/servers). This must be set BEFORE calling
         # pygame.init() / pygame.display.set_mode() and only affects this process.
-        if (self.render_mode != 'human'):
-          os.environ['SDL_VIDEODRIVER'] = 'dummy'
+        if self.render_mode != 'human':
+            os.environ['SDL_VIDEODRIVER'] = 'dummy'
+            # Optional: also silence audio in headless environments.
+            # os.environ['SDL_AUDIODRIVER'] = 'dummy'
 
         # Initialize pygame
         pygame.init()
@@ -85,11 +87,11 @@ class PongGame(gym.Env):
         self.fps = fps
 
         # Initialize background color (gray)
-        self.background_color = (100, 100, 100) 
+        self.background_color = (100, 100, 100)
 
         # Initialize colors of players
-        self.player_1_color = (102 , 0 , 204) # Purple
-        self.player_2_color = (255 , 255 , 204) # Yellow
+        self.player_1_color = (102, 0, 204)  # Purple
+        self.player_2_color = (255, 255, 204)  # Yellow
 
         # Initialize paddle dimensions
         self.paddle_height = 120
@@ -125,31 +127,33 @@ class PongGame(gym.Env):
         # Initialize Game state
         self.reset()
      
-    # Reset the game state
-    def reset(self):
+    def reset(self) -> None:
+        """Reset the game state.
 
+        Initializes players' scores to zero and sets the top score target.
+        """
         self.player_1_score = 0
         self.player_2_score = 0
-
         self.top_score = 20
 
-    # Fill the background with a color
-    def fill_background(self):
-        # Clear screen
+    def fill_background(self) -> None:
+        """Clear the frame and draw static UI elements (e.g., scores)."""
         self.screen.fill(self.background_color)
 
-        # Render scores
-        player_1_score_text = self.font.render(str(self.player_1_score), True, self.player_1_color)
-        player_2_score_text = self.font.render(str(self.player_2_score), True, self.player_2_color)
+        player_1_score_text = self.font.render(
+            str(f'P1 Score: {self.player_1_score}'), True, self.player_1_color
+        )
+        player_2_score_text = self.font.render(
+            str(f'P2 Score: {self.player_2_score}'), True, self.player_2_color
+        )
 
-        # Render scores
-        self.screen.blit(player_1_score_text, (self.window_width / 4, 10))
-        self.screen.blit(player_2_score_text, (3 * self.window_width / 4, 10))
+        # Blit scores to screen
+        self.screen.blit(player_1_score_text, (self.window_width // 4- 100, 10))
+        self.screen.blit(player_2_score_text, (3 * self.window_width // 4 - 100, 10))
         
 	
-    # Game loop
-    def game_loop(self):
-
+    def game_loop(self) -> None:
+        """Run the interactive game loop until the window is closed."""
         # Main game loop; fill background and update display each frame.
         while True:
             # Clear frame background
@@ -181,20 +185,25 @@ class PongGame(gym.Env):
                     player_2_action = 2
             
             # Print player actions
-            if (player_1_action != 0 ):
+            if player_1_action != 0:
                 print('Player 1 action: ', player_1_action)
             
-            if (player_2_action != 0 ):
+            if player_2_action != 0:
                 print('Player 2 action: ', player_2_action)
 
             # Step the environment
             self.step(player_1_action, player_2_action)
 
-    # Step the environment
-    def step(self , player_1_action: int, player_2_action: int):
-        
+    def step(self, player_1_action: int, player_2_action: int) -> None:
+        """Advance the environment by one frame and render if needed.
+
+        Args:
+            player_1_action: 0=none, 1=up, 2=down.
+            player_2_action: 0=none, 1=up, 2=down.
+        """
+
         self.fill_background()
-        if (self.render_mode == 'human'):
+        if self.render_mode == 'human':
             pygame.display.flip()
             if hasattr(self, 'clock'):
                 self.clock.tick(self.fps)
