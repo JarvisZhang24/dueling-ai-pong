@@ -1,3 +1,5 @@
+# dueling-ai-pong
+# python >= 3.12
 pygame
 numpy
 opencv-python==4.10.0.84

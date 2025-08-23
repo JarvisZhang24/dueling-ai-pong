@@ -6,6 +6,8 @@ import sys
 import pygame
 import gymnasium as gym
 
+from assets import Paddle
+
 class PongGame(gym.Env):
     """Pong game environment built on Gymnasium.
 
@@ -86,8 +88,8 @@ class PongGame(gym.Env):
         # Initialize fps
         self.fps = fps
 
-        # Initialize background color (gray)
-        self.background_color = (100, 100, 100)
+        # Initialize background color (black)
+        self.background_color = (0, 0, 0)
 
         # Initialize colors of players
         self.player_1_color = (102, 0, 204)  # Purple
@@ -135,6 +137,21 @@ class PongGame(gym.Env):
         self.player_1_score = 0
         self.player_2_score = 0
         self.top_score = 20
+
+        # Initialize player 1 paddle
+        self.player_1_paddle = Paddle(
+            x=50,
+            y=self.window_height // 2 - self.paddle_height // 2,
+            window_height=self.window_height,
+            paddle_color=self.player_1_color,
+        )
+        # Initialize player 2 paddle
+        self.player_2_paddle = Paddle(
+            x=self.window_width - 50 - self.paddle_width,
+            y=self.window_height // 2 - self.paddle_height // 2,
+            window_height=self.window_height,
+            paddle_color=self.player_2_color,
+        )
 
     def fill_background(self) -> None:
         """Clear the frame and draw static UI elements (e.g., scores)."""
@@ -192,7 +209,10 @@ class PongGame(gym.Env):
                 print('Player 2 action: ', player_2_action)
 
             # Step the environment
-            self.step(player_1_action, player_2_action)
+            self.step(
+                player_1_action=player_1_action,
+                player_2_action=player_2_action
+            )
 
     def step(self, player_1_action: int, player_2_action: int) -> None:
         """Advance the environment by one frame and render if needed.
@@ -202,7 +222,20 @@ class PongGame(gym.Env):
             player_2_action: 0=none, 1=up, 2=down.
         """
 
+
+        # Move paddles
+        self.player_1_paddle.move(player_1_action)
+        self.player_2_paddle.move(player_2_action)
+
+        # Fill background
         self.fill_background()
+
+        # Draw paddles
+        self.player_1_paddle.draw(self.screen)
+        self.player_2_paddle.draw(self.screen)
+
+
+        # Render frame
         if self.render_mode == 'human':
             pygame.display.flip()
             if hasattr(self, 'clock'):
