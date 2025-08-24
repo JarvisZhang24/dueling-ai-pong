@@ -6,7 +6,8 @@ import sys
 import pygame
 import gymnasium as gym
 
-from assets import Paddle
+from paddle import Paddle
+from ball import Ball
 
 class PongGame(gym.Env):
     """Pong game environment built on Gymnasium.
