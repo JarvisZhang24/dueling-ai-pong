@@ -154,6 +154,14 @@ class PongGame(gym.Env):
             paddle_color=self.player_2_color,
         )
 
+        # Initialize ball
+        self.ball = Ball(
+            window_height=self.window_height,
+            window_width=self.window_width,
+            player_1_paddle=self.player_1_paddle,
+            player_2_paddle=self.player_2_paddle,
+        )
+
     def fill_background(self) -> None:
         """Clear the frame and draw static UI elements (e.g., scores)."""
         self.screen.fill(self.background_color)
@@ -222,6 +230,45 @@ class PongGame(gym.Env):
             player_1_action: 0=none, 1=up, 2=down.
             player_2_action: 0=none, 1=up, 2=down.
         """
+        player_1_reward = 0
+        player_2_reward = 0
+        done = False
+        info = {}
+        truncate = False
+
+
+        player_1_reward = 0
+        player_2_reward = 0
+        info = {}
+        done = False
+        truncated = False
+
+        for i in range(self.step_repeat):
+            self._step(player_1_action=player_1_action,
+                       player_2_action=player_2_action)
+
+        ball_center = self.ball.x + (self.ball.width / 2)
+
+        if(ball_center < 0):
+            self.player_1_score += 1
+            player_1_reward += 1
+            player_2_reward -= 1
+            self.ball.spawn()
+        elif(ball_center > self.window_width):
+            self.player_2_score += 1
+            player_1_reward -= 1
+            player_2_reward += 1
+            self.ball.spawn()
+
+        
+
+    def _step(self, player_1_action: int, player_2_action: int) -> None:
+        """Advance the environment by one frame and render if needed.
+
+        Args:
+            player_1_action: 0=none, 1=up, 2=down.
+            player_2_action: 0=none, 1=up, 2=down.
+        """
 
 
         # Move paddles
@@ -234,6 +281,12 @@ class PongGame(gym.Env):
         # Draw paddles
         self.player_1_paddle.draw(self.screen)
         self.player_2_paddle.draw(self.screen)
+
+        # Move ball
+        self.ball.move()
+
+        # Draw ball
+        self.ball.draw(self.screen)
 
 
         # Render frame
